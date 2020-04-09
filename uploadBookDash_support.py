@@ -57,12 +57,12 @@ def upload():
     storage = firebase.storage()
     for x in range(filePathNP.size):
         ext = '.' + filePathNP[x].split('.')[-1]
-        loc = "users/{0}/{1}/{2}".format(user['localId'], str(w.TEntry1.get()), str(x)+ext)
+        loc = "users/{0}/{1}/{2}".format(user['localId'], str(w.TEntry1.get()), str(x+1)+ext)
         print(loc)
         storage.child(loc).put(str(filePathNP[x]), user['idToken'])
 
     database = firebase.database()
-    data = {"title": str(w.TEntry1.get()), "fileNum":str(filePathNP.size), "locSec":"0", "currentFile":"0",  "downloaded":"Cloud"}
+    data = {"title": str(w.TEntry1.get()), "fileNum":str(filePathNP.size), "locSec":"0", "currentFile":"1",  "downloaded":"Cloud"}
     database.child(user['localId']).child(str(w.TEntry1.get())).set(data, user['idToken'])
     print('uploadBookDash_support.upload')
     sys.stdout.flush()
