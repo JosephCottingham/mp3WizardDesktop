@@ -4,6 +4,7 @@ from pathlib import Path
 from tkinter import filedialog as fd
 import numpy as np
 import time
+from PIL import Image
 
 try:
     import Tkinter as tk
@@ -19,13 +20,20 @@ except ImportError:
 from firebase import Firebase
 
 def addFileToList():
-    path = str(fd.askopenfilename(initialdir=str(Path.home())))
-    if path != '':
+    path = str(fd.askopenfilename(initialdir=str(Path.home()), filetypes=[("Audio files", "*.mp3")]))
+    if path != '' and path is not None:
         if w.TEntry1.get() == '':
             name = path.split('/')[-1].split('.')[0]
             w.TEntry1.insert(0, name)
         filePathNPTemp = np.append(filePathNP, [path])
         resetScrolledFileList(filePathNPTemp)
+        sys.stdout.flush()
+
+def addIconFile():
+    path = str(fd.askopenfilename(initialdir=str(Path.home()), filetypes=[("Image files", ".png")]))
+    if path != '' and path is not None:
+        global iconFilePath
+        iconFilePath = path
         sys.stdout.flush()
 
 def resetScrolledFileList(filePathNPTemp):
@@ -61,6 +69,12 @@ def upload():
         print(loc)
         storage.child(loc).put(str(filePathNP[x]), user['idToken'])
 
+    if iconFilePath != '' and iconFilePath is not None:
+        storage.child("users/{0}/{1}/icon.png".format(user['localId'], str(w.TEntry1.get()))).put(str(iconFilePath), user['idToken'])
+    else:
+        storage.child("users/{0}/{1}/icon.png".format(user['localId'], str(w.TEntry1.get()))).put('icon.png', user['idToken'])
+
+
     database = firebase.database()
     data = {"title": str(w.TEntry1.get()), "fileNum":str(filePathNP.size), "locSec":"0", "currentFile":"1",  "downloaded":"Cloud"}
     database.child(user['localId']).child(str(w.TEntry1.get())).set(data, user['idToken'])
@@ -81,7 +95,7 @@ def destroy_window():
     top_level = None
 
 def start(u):
-    global user, filePathNP
+    global user, filePathNP, iconFilePath
     filePathNP = np.array([])
     user = u
     import uploadBookDash
